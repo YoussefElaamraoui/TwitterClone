@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports = class UtentiApi {
+
+    // Create a new user
     static async createUser(req, res) {
         let {
             email,
@@ -13,13 +15,12 @@ module.exports = class UtentiApi {
             confirm_password
         } = req.body;
 
+        // Validation of password and confirm_password
         if (password != confirm_password) {
             return res.status(400).json({
                 message: 'le due password non sono uguali'
             });
         }
-
-
 
         let newUser = new User({
             email,
@@ -27,8 +28,7 @@ module.exports = class UtentiApi {
             password
         });
 
-
-        console.log(newUser.password)
+        // Checking if the username is already used
         User.findOne({
                 username: username
             })
@@ -37,7 +37,9 @@ module.exports = class UtentiApi {
                     return res.status(400).json({
                         message: 'lo username è stato già usato'
                     });
-                } else {
+                }
+                else {
+                    // Encrypt the password, that will be saved in the database
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(newUser.password, salt, (err, hash) => {
                             if (err) throw err;
@@ -59,15 +61,13 @@ module.exports = class UtentiApi {
             });
     }
 
-
-
-
+    // Do the login of the user 
     static async login(req, res) {
         try {
+            // Does the user exist?
             const user = await User.findOne({
-                username: req.body.username,
+                username: req.body.username
             });
-
 
             if (!user) {
                 return res.status(400).json({
@@ -75,6 +75,7 @@ module.exports = class UtentiApi {
                 });
             }
 
+            // Decrypting the password
             const compare = await bcrypt.compare(req.body.password, user.password);
 
             if (!compare) {
@@ -83,46 +84,37 @@ module.exports = class UtentiApi {
                 });
             }
 
-            // Errori qua sotto :
-            console.log("arrivo qui");
-            console.log(req.body.username);
-            
-            console.log(process.env.ACCES_SECRET_TOKEN)
-
+            // Sing in and give the token
             const accessToken = jwt.sign({
-                    username: req.body.username
-                },
-                process.env.ACCES_SECRET_TOKEN, {
-                    expiresIn: '18000s'
-                }
-            );
-
-
-            console.log(accessToken);
+                id: user._id
+            }, process.env.ACCES_SECRET_TOKEN, {
+                expiresIn: '18000s',
+            });
 
             const refreshToken = jwt.sign({
-                    username: req.body.username
-                },
-                process.env.REFRESH_SECRET_TOKEN, {
-                    expiresIn: '1d'
-                }
-            );
+                id: user._id
+            }, process.env.REFRESH_SECRET_TOKEN, {
+                expiresIn: '1d',
+            });
 
             user.refreshToken = refreshToken;
             await user.save();
-
-            //Ci sono errori qua sopra :-> console.log("supero il user save if")
 
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
                 maxAge: 24 * 60 * 60 * 1000,
                 sameSite: 'None',
-                secure: true
-            });
-            res.json({
-                'access_token': accessToken
+                secure: true,
             });
 
+            // Set req.user object
+            req.user = {
+                id: user._id
+            };
+
+            res.json({
+                access_token: accessToken
+            });
         } catch (error) {
             console.error(error);
             return res.status(500).json({
@@ -131,23 +123,32 @@ module.exports = class UtentiApi {
         }
     }
 
+    //If the user is singed in, show the content
+    static async user(req, res) {
+        const user = req.user
 
+        console.log(user);
 
+        return res.status(200).json(user)
+    }
 
+    //Logout of the user, by deleting the tokens 
     static async logout(req, res) {
         const cookies = req.cookies;
-
-        console.log("ecco cosa contengono i cookie ")
-        console.log(cookies);
-
 
         if (!cookies.refresh_token) return res.sendStatus(204);
 
         const refreshToken = cookies.refresh_token;
-        const user = await User.finOne({ refresh_token: refreshToken })
+        const user = await User.finOne({
+            refresh_token: refreshToken
+        })
 
         if (!user) {
-            res.clearCookie('refresh_token', { http: true, sameSite: 'None', secure: true });
+            res.clearCookie('refresh_token', {
+                http: true,
+                sameSite: 'None',
+                secure: true
+            });
 
             return res.sendStatus(204);
         }
@@ -155,7 +156,46 @@ module.exports = class UtentiApi {
         user.refreshToken = null
         await user.save();
 
-        res.clearCookie('refresh_token',{httpOnly:true,sameSite: 'None',secure:true})
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            sameSite: 'None',
+            secure: true
+        })
         res.sendStatus(204);
+    }
+
+    static async refresh(req, res) {
+        const cookies = req.cookies;
+
+        if (!cookies.refresh_token) return res.sendStatus(400)
+
+        const refreshToken = cookies.refresh_token;
+
+        const user = await User.findOne({
+            refresh_token: refreshToken
+        }).exec();
+
+        if (!user) return res.sendStatus(403)
+
+        jwt.verify(
+            refreshToken,
+            process.env.REFRESH_SECRET_TOKEN,
+            (err, decoded) => {
+                if (err || user.username !== decoded.username) return res.sendStatus(403)
+
+                const accessToken = jwt.sign({
+                        username: decoded.username
+                    },
+                    process.env.ACCES_SECRET_TOKEN, {
+                        expiresIn: '1800s'
+                    }
+                )
+
+                res.json({
+                    acess_token: accessToken
+                })
+
+            }
+        )
     }
 };

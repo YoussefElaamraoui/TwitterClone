@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Simple post/messages database schema 
 const postSchema = mongoose.Schema({
     title: String,
     category: String,
