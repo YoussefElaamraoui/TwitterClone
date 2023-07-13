@@ -9,7 +9,7 @@ const auth = require("../middleware/auth");
 // Saving data in the folder
 let storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null, '../client copia/src/assets');
+        callback(null, '../client/src/assets');
 
     },
     filename: function (req, file, callback) {
@@ -29,7 +29,7 @@ router.get("/Messaggi/:id", API.fetchPostById);
 router.post("/Messaggi/",upload, API.createPost);
 router.patch("/Messaggi/:id",upload, API.updatePost);
 router.delete("/Messaggi/:id", API.deletePost);
-
+router.post("/Messaggi/comment/:id", API.comment);
 
 
 // User routes
@@ -37,6 +37,8 @@ router.post("/Registrazione", UtentiApi.createUser);
 router.post("/Login", UtentiApi.login);
 router.get("/User", UtentiApi.user);
 router.get("/Logout", UtentiApi.logout);
+
+
 
 
 

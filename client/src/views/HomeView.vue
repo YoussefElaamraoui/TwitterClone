@@ -14,11 +14,14 @@
         <div class="post__content">
 
           <div class="post__container__image">
-            <p class="post__title">Titolo</p>
-            <img class="post__image" :src="require('../assets/' + post.image)">
+            <p class="post__title">{{post.title}}</p>
+
+            <!-- showing image only if it was given by the user -->
+            <img v-if="post.image" class="post__image" :src="require('../assets/' + post.image)">
 
           </div>
           <p class="post__text">
+            <!-- {{ post.content }} -->
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in laoreet sapien.
             In pharetra augue nec interdum ornare. Donec feugiat massa vel nunc consequat interdum.
             Donec et iaculis lacus. Vivamus eget sagittis metus, ut luctus ligula. Donec vitae sem id nibh lacinia

@@ -31,8 +31,13 @@ module.exports = class API {
     //Creation of the post 
     static async createPost(req, res) {
         const post = req.body;
-        const imagename = req.file.originalname;
-        post.image = imagename;
+
+        // Checking if the user gave some image
+        if (req.file) {
+            const imagename = req.file.originalname;
+            post.image= imagename
+        }
+
         try {
             await Post.create(post);
             res.status(201).json({
@@ -98,6 +103,27 @@ module.exports = class API {
             })
         } catch (error) {
 
+        }
+    }
+
+
+    static async comment(req, res) {
+        console.log("sono nel comment")
+        const postId = req.params.id;
+        const comment = req.body.comment;
+        console.log(comment)
+        
+        try {
+            const post = await Post.findById(postId);
+            post.comments.push({ comment: comment });
+            await post.save();
+            res.status(201).json({
+                message: 'Il commento è stato aggiunto al post!'
+            });
+        } catch (err) {
+            res.status(400).json({
+                message: 'Ho avuto un errore'
+            });
         }
     }
 }
