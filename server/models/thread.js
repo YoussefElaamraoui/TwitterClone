@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 
 const threadSchema = mongoose.Schema({
-  originalPost: {
+  title: {
+    type: String,
+    required:true,
+  },
+  originalMessage: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post',
     required: true
   },
-  replies: [{
+  otherMessages: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post'
   }],

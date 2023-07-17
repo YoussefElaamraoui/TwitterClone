@@ -20,10 +20,6 @@ const postSchema = mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  thread: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Thread'
-  },
   comments: [commentSchema]
 });
 
