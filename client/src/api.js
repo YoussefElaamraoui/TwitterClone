@@ -1,6 +1,7 @@
 import axios from 'axios';
 const messaggi = '/Messaggi';
 const localhost = 'http://localhost:3000';
+const thread  = '/thread'
 
 export default class API {
     //tutto il feed di messaggi
@@ -34,5 +35,16 @@ export default class API {
     static async deletePost(id) {
         const res = await axios.delete(localhost + messaggi + '/' + id);
         return res.data;
+    }
+
+    static async allThreads() {
+        const res = await axios.get(localhost + thread)
+        return res.data;
+    }
+
+    static async fetchThreadById(id) {
+        const res = await axios.get(localhost + thread + '/' + id)
+        return res.data
+        
     }
 }

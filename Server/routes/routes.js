@@ -23,7 +23,7 @@ const upload = multer({
 }).single("image");
 
 
-// Posts routes
+// Posts routers
 router.get("/Messaggi", API.fetchAllPost);
 router.get("/Messaggi/:id", API.fetchPostById);
 router.post("/Messaggi/",upload, API.createPost);
@@ -31,8 +31,14 @@ router.patch("/Messaggi/:id",upload, API.updatePost);
 router.delete("/Messaggi/:id", API.deletePost);
 router.post("/Messaggi/comment/:id", API.comment);
 
+// Thread routers
+router.post("/thread", API.threadCreation)
+router.post("/thread/:id", API.threadAdd)
+router.get("/thread/", API.threadGetAll)
+router.get("/thread/:id", API.fetchThreadById)
 
-// User routes
+
+// User routers
 router.post("/Registrazione", UtentiApi.createUser);
 router.post("/Login", UtentiApi.login);
 router.get("/User", UtentiApi.user);
