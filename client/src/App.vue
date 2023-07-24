@@ -6,7 +6,7 @@
   <router-view />
 
   <footer>
-    <p>
+    <p style="margin: 0px;">
       Youssef El aamraoui<br>
       copyright 2023
     </p>
@@ -56,7 +56,5 @@ nav a.router-link-exact-active {
   text-decoration: none;
 }
 
-footer{
-  margin-top: 5%;
-}
+
 </style>
