@@ -45,6 +45,9 @@ module.exports = class API
     {
         const post = req.body;
 
+        const user = req.user;
+
+
         // Checking if the user gave some image
         if (req.file)
         {
@@ -64,7 +67,7 @@ module.exports = class API
         {
             res.status(400).json(
             {
-                message: 'Ho avuto un errore'
+                message: err
             });
         }
 
@@ -133,7 +136,7 @@ module.exports = class API
                 }
                 catch (error)
                 {
-                    console.log(error);
+                    (error);
                 }
             }
             res.status(200).json(
@@ -150,10 +153,9 @@ module.exports = class API
 
     static async comment(req, res)
     {
-        console.log("sono nel comment")
         const postId = req.params.id;
         const comment = req.body.comment;
-        console.log(comment)
+        (comment)
 
         try
         {
@@ -181,10 +183,12 @@ module.exports = class API
     static async threadCreation(req, res)
     {
         const dataThread = req.body;
-        console.log(dataThread)
+
+        console.log("Sono nel thread Creation, i dati",dataThread)
+        
 
 
-        const post = await Post.findById(dataThread.id);
+        const post = await Post.findById(dataThread.originalMessage);
         if (!post)
         {
             res.status(400).json(
@@ -196,7 +200,9 @@ module.exports = class API
         const newThread = new Thread(
         {
             title: dataThread.title,
-            originalMessage: dataThread.id
+            originalMessage: dataThread.originalMessage,
+            creator:dataThread.creator,
+            
         })
 
         try
@@ -221,6 +227,7 @@ module.exports = class API
     static async threadAdd(req, res)
     {
         const dataThread = req.body;
+        const dataCreator = req.user;
         const idThread = req.params.id;
 
 
@@ -239,7 +246,7 @@ module.exports = class API
 
             // Verify if a thread with the given ID exists
             const existingThread = await Thread.findById(idThread)
-            console.log(existingThread)
+            (existingThread)
 
             if (!existingThread)
             {
@@ -249,7 +256,18 @@ module.exports = class API
                 });
             }
 
-            console.log(existingThread)
+            // Checking if the user is allowed 
+            const allowed = existingThread.id === dataCreator.id ? true : false;
+
+            // un'altro controllo da fare sarebbe quello di non poter inserire lo stesso post più volte nel thread
+
+            if (!allowed) {
+                return res.status(400).json(
+                {
+                    message: "Non puoi eseguire questa operazione."
+                });
+            }
+            
             // Add the post ID to the 'otherMessages' field of the existing thread
             existingThread.otherMessages.push(dataThread.id);
 

@@ -65,6 +65,8 @@ export default {
   },
 async created() {
   try {
+
+
     const postThreads = await API.fetchThreadById(this.$route.params.id);
     const postTemporaneo = [];
     // Inserisco il primo post in posts
@@ -84,7 +86,7 @@ async created() {
     });
 
     this.posts = await Promise.all(promises);
-    console.log(this.posts);
+    (this.posts);
   } catch (error) {
     console.error(error);
   }

@@ -1,7 +1,8 @@
 <template>
-  <nav>
+  <!-- <nav>
     <router-link to="/">Home</router-link> 
-  </nav>
+  </nav> -->
+  
   <router-view />
 
   <footer>

@@ -17,7 +17,8 @@
                 <label for="confirm_password"><b>Confirm Password</b></label>
                 <input v-model="user.confirm_password" type="password" placeholder="Confirm Password"
                     name="confirm_password" required>
-
+                <br>
+                <br>
                 <button type="submit">
                     Registrati
                 </button>
@@ -49,11 +50,13 @@ export default {
         async submitForm() {
             try {
                 const response = await axios.post(url, this.user);
-                console.log(response.data);
-                // Handle the response as needed
+                (response.data);
+
+                // A fine registrazione se avvenuta con successo, manda al login
+                this.$router.push({ name: 'login', query: { registrationSuccess: 'true' } });
+                
             } catch (error) {
                 console.error(error);
-                // Handle any error that occurred during the request
             }
         },
     },

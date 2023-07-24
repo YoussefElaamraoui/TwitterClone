@@ -14,6 +14,11 @@ const threadSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post'
   }],
+  creator: {
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'users',
+    required: true
+  },
   created: {
     type: Date,
     default: Date.now

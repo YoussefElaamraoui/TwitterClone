@@ -3,35 +3,35 @@ const User = require('../models/utenti');
 
 // Authentication of the user by using jsonwebtoken
 function authentication(req, res, next) {
-    const authHeader=req.headers.authorization || req.headers.Authorization
+    const authHeader = req.headers.authorization || req.headers.Authorization;
 
     if (authHeader?.startsWith('Bearer')) {
-        const token = authHeader.split(' ')[1]
+        const token = authHeader.split(' ')[1];
+        (process.env.ACCES_SECRET_TOKEN)
 
-        jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, async (err, decoded) => {
+        jwt.verify(token, process.env.ACCES_SECRET_TOKEN, async (err, decoded) => {
             if (err) {
-                req.user = {}
-                return next ()
-            }
-
-            const user = await User.findById(decoded.id).select({password:0,refresh_token:0}).exec()
-        
-            if (user) {
-                req.user = user.toObjcet({getters:true})
+                (err)
+                req.user = {};
+                return next();
             }
             else {
-                req.user = {}
+                // console.log("Decoded user data:", decoded);
+            }
+            const user = await User.findOne({ username: decoded.id }).select({ password: 0, refresh_token: 0 }).exec();
+
+            if (user) {
+                req.user = user.toObject({ getters: true });
+            } else {
+                req.user = {};
             }
 
-            return next()
-        })
-
+            return next();
+        });
+    } else {
+        req.user = {};
+        return next();
     }
-    else {
-        req.user = {}
-        return next ()
-    }
-
 }
 
-module.exports = authentication
+module.exports = authentication;

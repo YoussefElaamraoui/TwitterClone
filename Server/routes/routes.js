@@ -3,7 +3,7 @@ const router = express.Router();
 const API = require('../controllers/api')
 const UtentiApi = require('../controllers/reg')
 const multer = require('multer');
-const auth = require("../middleware/auth");
+const authentication = require("../middleware/authentication")
 
 
 // Saving data in the folder
@@ -22,11 +22,15 @@ const upload = multer({
     storage: storage,
 }).single("image");
 
+router.use(authentication);
+
+// Devo anche mettere che non si può andare nel sito se non si è fatto il login
+
 
 // Posts routers
 router.get("/Messaggi", API.fetchAllPost);
 router.get("/Messaggi/:id", API.fetchPostById);
-router.post("/Messaggi/",upload, API.createPost);
+router.post("/Messaggi",upload, API.createPost);
 router.patch("/Messaggi/:id",upload, API.updatePost);
 router.delete("/Messaggi/:id", API.deletePost);
 router.post("/Messaggi/comment/:id", API.comment);
@@ -41,8 +45,9 @@ router.get("/thread/:id", API.fetchThreadById)
 // User routers
 router.post("/Registrazione", UtentiApi.createUser);
 router.post("/Login", UtentiApi.login);
-router.get("/User", UtentiApi.user);
-router.get("/Logout", UtentiApi.logout);
+router.get("/User/:id", UtentiApi.user);
+// Viene usato comunemente con tipologia post e non get
+router.post("/Logout", UtentiApi.logout);
 
 
 

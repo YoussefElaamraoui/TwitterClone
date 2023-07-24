@@ -1,7 +1,8 @@
 import axios from 'axios';
 const messaggi = '/Messaggi';
 const localhost = 'http://localhost:3000';
-const thread  = '/thread'
+const thread = '/thread'
+
 
 export default class API {
     //tutto il feed di messaggi
@@ -37,6 +38,9 @@ export default class API {
         return res.data;
     }
 
+    // 
+    // Beginning of Thread's 
+    // 
     static async allThreads() {
         const res = await axios.get(localhost + thread)
         return res.data;
@@ -47,4 +51,23 @@ export default class API {
         return res.data
         
     }
+
+    static async addThread(threadData) {
+        const res = await axios.post(localhost + thread ,threadData)
+        return res.data
+        
+    }
+
+    
+
+
+    //
+    // Beginning of Login's
+    //
+    
+    static async fetchUser(id) {
+        const res = await axios.get(localhost + '/user' + '/' + id)
+        return res.data
+    }
+
 }
