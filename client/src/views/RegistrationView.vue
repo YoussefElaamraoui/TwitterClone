@@ -30,7 +30,7 @@
                     <br>
                     <br>
                     <div id="button__container">
-                        <button  style="margin-right:15px" type="submit">
+                        <button style="margin-right:15px" type="submit">
                             Registrati
                         </button>
                         <router-link to="/login">
@@ -95,13 +95,17 @@ body {
 #form__container__image {
     width: 50%;
     background-color: #F8F4E3;
+    /*background-image: url('../assets/scribbles-scribbles-1.gif');
+    background-position: center;
+    background-size: 50%;
+    background-repeat: no-repeat;*/
 }
 
 #form__image {
     height: 100%;
     width: 50%;
     margin-left: 25%;
-    background-image: url('../assets/bonbon-sign-in-to-the-account-with-username-and-password-1.png');
+    background-image: url('../assets/surr-467.png');
     background-position: center center;
     background-size: contain;
     background-repeat: no-repeat;
@@ -112,7 +116,7 @@ body {
     width: 50%;
 }
 
-#button__container{
+#button__container {
     padding: 15px;
 }
 
@@ -127,8 +131,8 @@ body {
     margin-top: 15%;
 }
 
-button{
-    border: 0px ;
+button {
+    border: 0px;
     background-color: #2E282A;
     color: white;
     padding: 10px;

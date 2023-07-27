@@ -2,7 +2,7 @@
   <!-- <nav>
     <router-link to="/">Home</router-link> 
   </nav> -->
-  
+
   <router-view />
 
   <footer>
@@ -15,10 +15,11 @@
 
 <style>
 /* style to take all the page width and height */
-html{
+html {
   height: 100%;
   width: 100%;
 }
+
 body {
   padding: 0px;
   margin: 0px;
@@ -29,6 +30,7 @@ body {
 footer {
   background-color: black;
   color: white;
+  width: 100%;
 }
 
 #app {
@@ -55,6 +57,4 @@ nav a.router-link-exact-active {
   color: #2d2d2d;
   text-decoration: none;
 }
-
-
 </style>

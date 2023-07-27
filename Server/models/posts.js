@@ -20,6 +20,10 @@ const postSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, // Change the type to ObjectId
     ref: 'User', // Replace 'User' with the actual model name for your users.
   },
+  creatorName: {
+    type: String,
+
+  },
   created: {
     type: Date,
     default: Date.now
