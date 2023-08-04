@@ -103,8 +103,8 @@ body {
 
 #form__image {
     height: 100%;
-    width: 50%;
-    margin-left: 25%;
+    width: 30%;
+    margin-left: 35%;
     background-image: url('../assets/surr-467.png');
     background-position: center center;
     background-size: contain;

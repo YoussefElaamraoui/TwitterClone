@@ -1,7 +1,4 @@
 <template>
-  <!-- <nav>
-    <router-link to="/">Home</router-link> 
-  </nav> -->
 
   <router-view />
 
@@ -14,6 +11,7 @@
 </template>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Damion&display=swap');
 /* style to take all the page width and height */
 html {
   height: 100%;
@@ -44,7 +42,7 @@ footer {
 }
 
 nav {
-  padding: 30px;
+  padding-top: 15px;
 }
 
 nav a {

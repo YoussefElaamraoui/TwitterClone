@@ -20,6 +20,11 @@ export default class API {
         return res.data;
     }
 
+    static async getAllPostByUsername(id) {
+        const res = await axios.get(localhost + messaggi + '/' + 'username/' + id);
+        return res.data;
+    }
+
     //creazione di nuovi messaggi
     static async addPost(post) {
         const res = await axios.post(localhost+messaggi,post);
@@ -52,8 +57,13 @@ export default class API {
         
     }
 
-    static async addThread(threadData) {
-        const res = await axios.post(localhost + thread ,threadData)
+    static async creationThread(threadData) {
+        const res = await axios.post(localhost + thread, threadData);
+        return res.data;
+    }
+
+    static async addThread(threadData, id) {
+        const res = await axios.post(localhost + thread +'/'+id, threadData)
         return res.data
         
     }
@@ -67,7 +77,26 @@ export default class API {
     
     static async fetchUser(id) {
         const res = await axios.get(localhost + '/user' + '/' + id)
+        console.log(localhost + '/user' + '/' + id);
         return res.data
     }
+
+    static async Logout() {
+        const res = await axios.get(localhost + '/Logout')
+        return res.data;
+    }
+
+    // Comment
+
+static async Comment(commentData) {
+  try {
+    const res = await axios.post(localhost + messaggi + '/comment/' + commentData.get('postId'),{ content: commentData.get('content'), creatorUsername : commentData.get('creatorUsername') });
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
 
 }

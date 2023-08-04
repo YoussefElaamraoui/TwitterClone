@@ -8,6 +8,7 @@
       <h1 id="page__title">Login</h1>
       <div class="container">
         <p v-if="registrationSuccess">Registrazione avvenuta con successo!</p>
+        <p v-if="loginErrato">{{ errorMessage }} </p>
         <form enctype="application/x-www-form-urlencoded" @submit.prevent="submitForm">
           <label for="username"><b>Username</b></label>
           <br>
@@ -22,6 +23,9 @@
           <button type="submit">
             Accedi
           </button>
+          <router-link style="margin-left: 15px;" to="/registration">
+            <button>registrazione</button>
+          </router-link>
         </form>
       </div>
     </div>
@@ -45,6 +49,8 @@ export default {
         username: '',
         password: '',
       },
+      loginErrato: false,
+      errorMessage: null,
     };
   },
   created() {
@@ -56,15 +62,20 @@ export default {
       try {
         const response = await axios.post(url, this.user);
 
+        console.log('Response from server:', response.data); // Add this line
+
         const accessToken = response.data.access_token;
-        this.$store.dispatch('setAuthentication', accessToken);
+        localStorage.setItem('access_token', accessToken);
+
+
+        console.log('AccessToken:', accessToken); // Add this line
 
         // A fine registrazione se avvenuta con successo, manda al login
         this.$router.push({ name: 'home' });
       } catch (error) {
-        console.error(error);
+        this.errorMessage = error.response.data.message;
+        this.loginErrato = true;
       }
-
     },
   },
 };
@@ -113,13 +124,13 @@ body {
   margin-top: 15%;
 }
 
-button{
-    border: 0px ;
-    background-color: #2E282A;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bolder;
+button {
+  border: 0px;
+  background-color: #2E282A;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bolder;
 }
 </style>

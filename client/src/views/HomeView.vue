@@ -1,4 +1,8 @@
 <template>
+  <nav>
+    <router-link style="font-family:'Damion';font-size:30px" to="/"><span style="color:#EF3E36;">T</span>wi<span
+        style="color:#EF3E36;">tt</span>o</router-link>
+  </nav>
   <div id="contenuto">
     <div id="nav__home">
       <div id="home__title">
@@ -10,9 +14,17 @@
             </button>
           </div>
         </div>
-        <p id="title__username">Ciao, {{ userData.id }}!</p>
+        <p v-if="userData" id="title__username">Ciao, {{ userData.id }}!</p>
       </div>
     </div>
+
+    <div id="nothing__container" v-if="threads.length === 0">
+      <div id="nothing__content">
+        <p id="nothing__text">Nulla da vedere, mi dispiace ):</p>
+        <img id="nothing__img" src="../assets/looney-sad-empty-wallet.png">
+      </div>
+    </div>
+
 
 
 
@@ -37,19 +49,21 @@
         <div>
         </div>
         <div id="thread__content">
-          <p>{{ threadFeed.content }}</p>
-          <br>
-          <p style="font-family: 'Open Sans';font-size: 0.7rem;font-style:italic">creator: {{ threadFeed.creatorName }}</p>
+          <router-link :to="'/thread/' + threadFeed._id" style="color: ;">Vai al thread</router-link>
+          <p style="font-family: 'Open Sans';font-size: 0.7rem;font-style:italic">creator: {{ threadFeed.creatorName }}
+          </p>
         </div>
       </div>
     </div>
+
+
 
     <div id="sidebar" :class="{ active: showSidebar }">
       <div id="sidebar__username">
         <div style="width: 100%;">Menu</div>
         <button id="sidebar__button" style="text-decoration:none" @click="openSidebar">X</button>
       </div>
-      <div id="sidebar__content">
+      <div id="sidebar__content" v-if="userData">
         {{ userData.id }}
         <br>
         <button style="padding:0px;  text-decoration:none;  font-size: .7em; color: #EF3E36;" @click="logOut()">Log
@@ -60,6 +74,7 @@
       <br>
 
       <button @click="showForm = true">Aggiungi Post/Thread</button>
+
       <!-- Pop-up form Post -->
       <div v-if="showForm" class="form-popup">
         <br>
@@ -108,12 +123,21 @@
           <input v-model="thread.title" type="text" required>
           <br>
 
-          <label class="form__label" for="OriginalMessage">Attach Message</label>
           <br>
-          <input v-model="thread.originalMessage" type="text" required>
+          Post da collegare al thread:
           <br>
+          <br>
+          <!-- Cambiare in solo post dell'utente -->
+          <div v-for="threadFeed in postUser" :key="threadFeed._id">
+            <label>
+              <input type="radio" name="scelta" :value="threadFeed._id" v-model="thread.originalMessage"
+                @change="updateSelection" required />
+              {{ threadFeed.title }}
+            </label>
+          </div>
 
 
+          <br><br>
           <button type="submit">Save</button>
           <button @click="showForm = false">Cancel</button>
         </form>
@@ -236,6 +260,24 @@
 
 }
 
+#nothing__container {
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+#nothing__img {}
+
+#nothing__text {
+  font-size: 2.25em;
+  margin-bottom: 5%;
+
+  font-family: 'Anton', sans-serif;
+
+}
+
 #thread__title {
   font-family: 'Anton';
   text-align: left;
@@ -275,9 +317,18 @@
   height: 100%;
 }
 
+.form-popup {
+  margin-bottom: 20%;
+}
+
+select {
+  margin-bottom: 10%;
+  margin-top: 10%;
+}
 
 #sidebar {
   color: white;
+  overflow-y: auto;
   position: fixed;
   top: 0;
   right: 0;
@@ -346,10 +397,12 @@ export default {
   data() {
     return {
       threads: [],
+      postUser: [],
       thread: {
         title: '',
         originalMessage: '',
         creator: '',
+        creatorName: '',
       },
       post: {
         title: '',
@@ -362,18 +415,23 @@ export default {
       showSidebar: false,
       showForm: false,
       userDecoded: null,
+      loading: true,
     };
   },
 
   computed: {
     isAuthenticated() {
       return this.$store.state.isAuthenticated;
+
     },
     accessToken() {
+      this.$store.state.accessToken = localStorage.getItem('access_token')
       return this.$store.state.accessToken;
     },
     userData() {
       if (this.isAuthenticated && this.accessToken) {
+        console.log("I dati dell'utente", this.userDecoded);
+        console.log("l'access token ", this.accessToken)
         return this.userDecoded;
       } else {
         return null;
@@ -381,11 +439,35 @@ export default {
     },
   },
 
+
+  watch: {
+    userAccessToken: {
+      immediate: true,
+      handler(newToken) {
+        if (newToken) {
+          // Token is available, decode and set user data
+          this.userDecoded = jwtDecode(newToken);
+          this.fetchData(); // Fetch data for the new user
+        } else {
+          // Token is not available (user logged out), clear user data
+          this.userDecoded = null;
+        }
+      },
+    },
+  },
+
+
   methods: {
     async fetchData() {
       try {
-        this.threads = await API.getAllPost();
-        console.log("Fetched Threads:", this.threads); // Check if data is received
+        this.threads = await API.allThreads();
+
+        const userData = this.userData;
+
+        //Potevo usare anche l'id, ma mi risultava più semplice andare verso questa strada
+        this.postUser = await API.getAllPostByUsername(userData.id)
+
+
       } catch (error) {
         console.error(error);
       }
@@ -413,11 +495,12 @@ export default {
 
         const userData = await API.fetchUser(user.id);
 
+        console.log(userData);
+
         this.post.creator = userData._id;
         this.post.username = userData.username;
 
 
-        console.log(this.post.creator);
 
         const formData = new FormData();
         formData.append('title', this.post.title);
@@ -428,7 +511,6 @@ export default {
         formData.append('creatorName', this.post.username); // Append the image file
 
         const response = await API.addPost(formData);
-        console.log(response);
 
         // After successfully adding the post, fetch the updated data
         this.fetchData();
@@ -451,8 +533,18 @@ export default {
         const userData = await API.fetchUser(user.id);
 
         this.thread.creator = userData._id;
+        this.thread.creatorName = userData.username;
 
-        const response = await API.addThread(this.thread);
+        const formData = new FormData();
+        formData.append('title', this.thread.title);
+        formData.append('originalMessage', this.thread.originalMessage);
+        formData.append('creator', this.thread.creator);
+        formData.append('creatorName', this.thread.creatorName);
+
+        console.log("thread content", this.thread)
+
+        const response = await API.creationThread(this.thread);
+        console.log(response);
 
         // After successfully adding the thread, fetch the updated data
         this.fetchData();
@@ -460,13 +552,16 @@ export default {
         console.error(error);
       }
     },
-    async logOut() {
-      await axios.post(url + 'logout'); // Assuming this is your logout API endpoint
-      this.$router.push({ name: 'login' });
-    },
+
+    async logOut(req, res) {
+      localStorage.removeItem('access_token');
+      this.userDecoded = null;
+      this.accessToken = null;
+      this.$router.push('/login');
+    }
   },
 
-  async created() {
+  created() {
     const store = useStore();
     const isAuthenticated = computed(() => store.state.isAuthenticated);
     const accessToken = computed(() => store.state.accessToken);
@@ -474,7 +569,9 @@ export default {
     watchEffect(() => {
       if (isAuthenticated.value && accessToken.value) {
         this.userDecoded = jwtDecode(accessToken.value);
-        this.fetchData();
+        if (this.userDecoded) {
+          this.fetchData();
+        }
       }
     });
   },

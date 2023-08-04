@@ -160,41 +160,40 @@ module.exports = class UtentiApi
     }
 
     //Logout of the user, by deleting the tokens 
-    static async logout(req, res)
-    {
-        const cookies = req.cookies;
+    static async logout(req, res) {
+        console.log("ciao come stai");
+       const refreshToken = req.cookies.access_token;
+       
+       console.log("il refresh tokne",refreshToken);
 
-        if (!cookies.access_token) return res.sendStatus(204);
-
-        const refreshToken = cookies.access_token;
-        const user = await User.finOne(
-        {
-            access_token: refreshToken
-        })
-
-        if (!user)
-        {
-            res.clearCookie('access_token',
-            {
-                http: true,
-                sameSite: 'None',
-                secure: true
-            });
-
-            return res.sendStatus(204);
-        }
-
-        user.access_token = null
-        await user.save();
-
-        res.clearCookie('access_token',
-        {
-            httpOnly: true,
-            sameSite: 'None',
-            secure: true
-        })
-        res.sendStatus(204);
+  // Remove the refresh token from the database
+  if (refreshToken) {
+    const user = await User.findOne({ refresh_token: refreshToken });
+    if (user) {
+      // Clear the refresh_token field for the user
+      user.refresh_token = undefined;
+      await user.save();
     }
+  }
+
+  // Clear the access token cookie on the client-side
+  res.clearCookie('refresh_token', {
+    httpOnly: true,
+    sameSite: 'None',
+    secure: true,
+  });
+
+  // Clear the access token from local storage
+  localStorage.removeItem('access_token');
+
+  res.json({
+    message: 'Logout successful',
+  });
+}
+
+
+
+
 
     // static async refresh(req, res) {
     //     const cookies = req.cookies;

@@ -19,6 +19,10 @@ const threadSchema = mongoose.Schema({
     ref: 'users',
     required: true
   },
+  creatorName:{
+  type: String,
+    
+  },
   created: {
     type: Date,
     default: Date.now

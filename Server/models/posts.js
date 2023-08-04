@@ -5,6 +5,10 @@ const commentSchema = mongoose.Schema({
     type:String,
     required: true
   },
+  creator: {
+    type:String,
+    required:true
+  },
   created: {
     type: Date,
     default: Date.now

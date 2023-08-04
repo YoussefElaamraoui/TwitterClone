@@ -30,6 +30,7 @@ router.use(authentication);
 // Posts routers
 router.get("/Messaggi", API.fetchAllPost);
 router.get("/Messaggi/:id", API.fetchPostById);
+router.get("/Messaggi/username/:id", API.fetchPostByUsername);
 router.post("/Messaggi",upload, API.createPost);
 router.patch("/Messaggi/:id",upload, API.updatePost);
 router.delete("/Messaggi/:id", API.deletePost);
@@ -47,7 +48,7 @@ router.post("/Registrazione", UtentiApi.createUser);
 router.post("/Login", UtentiApi.login);
 router.get("/User/:id", UtentiApi.user);
 // Viene usato comunemente con tipologia post e non get
-router.post("/Logout", UtentiApi.logout);
+router.get("/Logout", UtentiApi.logout);
 
 
 

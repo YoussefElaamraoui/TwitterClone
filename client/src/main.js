@@ -4,6 +4,7 @@ import router from './router'
 import store from '../store';
 
 
+
 const storedAccessToken = localStorage.getItem('access_token');
 if (storedAccessToken) {
   store.dispatch('setAuthentication', storedAccessToken);
