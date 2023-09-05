@@ -2,7 +2,7 @@ import axios from 'axios';
 const messaggi = '/Messaggi';
 const localhost = 'http://localhost:3000';
 const thread = '/thread'
-
+const like = '/like'
 
 export default class API {
     //tutto il feed di messaggi
@@ -36,6 +36,11 @@ export default class API {
         const res = await axios.patch(localhost + messaggi + '/' + id,post);
         return res.data;
     }
+    static async updatePostLikes(id, oldPost,userLiked) {
+        const res = await axios.patch(localhost + messaggi + like + '/' + id,{ oldPost, userLiked });
+        return res.data;
+    }
+
 
     //Cancellazione di post 
     static async deletePost(id) {
@@ -56,6 +61,8 @@ export default class API {
         return res.data
         
     }
+
+
 
     static async creationThread(threadData) {
         const res = await axios.post(localhost + thread, threadData);

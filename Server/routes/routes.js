@@ -24,7 +24,6 @@ const upload = multer({
 
 router.use(authentication);
 
-// Devo anche mettere che non si può andare nel sito se non si è fatto il login
 
 
 // Posts routers
@@ -32,7 +31,8 @@ router.get("/Messaggi", API.fetchAllPost);
 router.get("/Messaggi/:id", API.fetchPostById);
 router.get("/Messaggi/username/:id", API.fetchPostByUsername);
 router.post("/Messaggi",upload, API.createPost);
-router.patch("/Messaggi/:id",upload, API.updatePost);
+router.patch("/Messaggi/:id", upload, API.updatePost);
+router.patch("/Messaggi/like/:id",API.updatePostLikes)
 router.delete("/Messaggi/:id", API.deletePost);
 router.post("/Messaggi/comment/:id", API.comment);
 
@@ -47,6 +47,7 @@ router.get("/thread/:id", API.fetchThreadById)
 router.post("/Registrazione", UtentiApi.createUser);
 router.post("/Login", UtentiApi.login);
 router.get("/User/:id", UtentiApi.user);
+
 // Viene usato comunemente con tipologia post e non get
 router.get("/Logout", UtentiApi.logout);
 

@@ -12,8 +12,6 @@ function authentication(req, res, next) {
                 return next();
             }
 
-            console.log('Decoded user data:', decoded); // Add this line to log the decoded user data
-
             const user = await User.findOne({ username: decoded.id }).select({ password: 0, refresh_token: 0 }).exec();
 
             if (user) {

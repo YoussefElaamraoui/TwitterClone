@@ -23,7 +23,7 @@ module.exports = class UtentiApi
         {
             return res.status(400).json(
             {
-                message: 'le due password non sono uguali'
+                message: 'Le due password non sono uguali!'
             });
         }
 
@@ -119,8 +119,6 @@ module.exports = class UtentiApi
             }
         );
 
-        (process.env.ACCES_SECRET_TOKEN);
-
         const refreshToken = jwt.sign(
             {
                 id: user.username
@@ -134,13 +132,15 @@ module.exports = class UtentiApi
         user.refresh_token = refreshToken
         await user.save()
 
-        res.cookie('refresh_token', refreshToken,
-        {
-            httpOnly: true,
-            sameSite: 'None',
-            secure: true,
-            maxAge: 24 * 60 * 60 * 1000
-        })
+        // I decided to use local storage
+        // res.cookie('refresh_token', refreshToken,
+        // {
+        //     httpOnly: true,
+        //     sameSite: 'None',
+        //     secure: true,
+        //     maxAge: 24 * 60 * 60 * 1000
+        // })
+
         res.json(
         {
             access_token: accessToken
@@ -161,35 +161,62 @@ module.exports = class UtentiApi
 
     //Logout of the user, by deleting the tokens 
     static async logout(req, res) {
-        console.log("ciao come stai");
-       const refreshToken = req.cookies.access_token;
-       
-       console.log("il refresh tokne",refreshToken);
+        
+        // const refreshToken = req.cookies.access_token;
+        
+        // // if (refreshToken) {
+        // //     const user = await User.findOne({ refresh_token: refreshToken });
+        // //     if (user) {
+        // //         // Clear the refresh_token field for the user
+        // //         user.refresh_token = undefined;
+        // //         await user.save();
+        // //     }
+        // // }
+        // // Clear the access token cookie on the client-side
+        // // res.clearCookie('refresh_token', {
+        // //     httpOnly: true,
+        // //     sameSite: 'None',
+        // //     secure: true,
+        // // });
 
-  // Remove the refresh token from the database
-  if (refreshToken) {
-    const user = await User.findOne({ refresh_token: refreshToken });
-    if (user) {
-      // Clear the refresh_token field for the user
-      user.refresh_token = undefined;
-      await user.save();
+        // Clear the access token from local storage
+        localStorage.removeItem('access_token');
+        res.json({
+            message: 'Logout successful',
+        });
     }
-  }
+};
 
-  // Clear the access token cookie on the client-side
-  res.clearCookie('refresh_token', {
-    httpOnly: true,
-    sameSite: 'None',
-    secure: true,
-  });
 
-  // Clear the access token from local storage
-  localStorage.removeItem('access_token');
 
-  res.json({
-    message: 'Logout successful',
-  });
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -231,4 +258,3 @@ module.exports = class UtentiApi
     //         }
     //     )
     // }
-};

@@ -47,7 +47,6 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.name === 'registration') {
     next();
-    
   }
 
   if (to.name !== 'login'  && !authenticated) {

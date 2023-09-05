@@ -1,9 +1,12 @@
 <template>
-  <nav>
+  <div :class="{ 'card': moveCard, 'cardMoved': !moveCard }">
+  </div>
+
+  <nav style="opacity: 0;transition:0.5s" :class="{ 'page-loaded': !loading }">
     <router-link style="font-family:'Damion';font-size:30px" to="/"><span style="color:#EF3E36;">T</span>wi<span
         style="color:#EF3E36;">tt</span>o</router-link>
   </nav>
-  <div id="contenuto">
+  <div id="contenuto" :class="{ 'page-loaded': !loading }">
     <div id="nav__home">
       <div id="home__title">
         <div id="homeButton">
@@ -29,7 +32,9 @@
 
 
 
-    <div class="threadFeed" v-for="threadFeed in threads" :key="threadFeed._id">
+    <input v-model="filterTitle" type="text" placeholder="filtra">
+
+    <div class="threadFeed" v-for="threadFeed in filteredThreads" :key="threadFeed._id">
       <div id="thread__container">
         <div class="thread__title__feed">
           <div style="width: 65%;">
@@ -154,8 +159,33 @@
 #contenuto {
   display: block;
   padding: 50px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 
+.page-loaded {
+  opacity: 1 !important;
+}
+
+.card {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: 1;
+  background-color: #f15946;
+  transform: translate(-100vw, 0);
+  transition: 2s ease-in-out;
+}
+
+.cardMoved {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: 1;
+  background-color: #f15946;
+  transform: translate(100vw, 0);
+  transition: 2s ease-in-out;
+}
 
 
 #thread {
@@ -404,6 +434,7 @@ export default {
         creator: '',
         creatorName: '',
       },
+      filterTitle: '',
       post: {
         title: '',
         category: '',
@@ -416,6 +447,7 @@ export default {
       showForm: false,
       userDecoded: null,
       loading: true,
+      moveCard: true,
     };
   },
 
@@ -423,6 +455,18 @@ export default {
     isAuthenticated() {
       return this.$store.state.isAuthenticated;
 
+    },
+
+    filteredThreads() {
+      // Filter the threads based on the filterTitle
+      return this.threads.filter(thread => {
+        // Convert both the thread title and filterTitle to lowercase for case-insensitive filtering
+        const threadTitle = thread.title.toLowerCase();
+        const searchTerm = this.filterTitle.toLowerCase();
+
+        // Check if the thread title contains the search term
+        return threadTitle.includes(searchTerm);
+      });
     },
     accessToken() {
       this.$store.state.accessToken = localStorage.getItem('access_token')
@@ -574,6 +618,16 @@ export default {
         }
       }
     });
+
+    setTimeout(() => {
+
+      this.moveCard = false; // card 
+    }, 0);
+
+    setTimeout(() => {
+
+      this.loading = false; // opacity 
+    }, 2000);
   },
 };
 </script>

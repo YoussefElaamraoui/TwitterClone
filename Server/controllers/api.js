@@ -40,17 +40,22 @@ module.exports = class API
         }
     }
 
+
+
     static async fetchPostByUsername(req, res)
     {
         const id = req.params.id; //prendo l'id dall'url 
         try
         {
-            const post = await Post.find({ creatorName: id });
+            const post = await Post.find(
+            {
+                creatorName: id
+            });
             res.status(200).json(post);
         }
         catch (error)
         {
-            res.status(200).json(
+            res.status(400).json(
             {
                 message: error.message
             })
@@ -63,20 +68,22 @@ module.exports = class API
         const post = req.body;
         const user = req.user;
 
-        console.log("vediamo il post se viene preso o meno",post)
 
         // Checking if the user gave some image
-        if (req.file){
+        if (req.file)
+        {
             const imagename = req.file.originalname;
             post.image = imagename
         }
 
-        try{
+        try
+        {
             const createdPost = await Post.create(post); // Create the post and get the result
 
             // Extract the ID of the created post
             const postId = createdPost._id;
-            res.status(201).json({
+            res.status(201).json(
+            {
                 message: 'Il Post è stato creato!',
                 postId: postId // Return the post ID in the response
             });
@@ -89,6 +96,51 @@ module.exports = class API
             });
         }
     }
+
+    static async updatePostLikes(req, res) {
+    try {
+        const newPost = req.body; // I want the post id, not the thread
+
+        const userCheckLiked = newPost.userLiked;
+
+        // Check if the user already liked the post
+        const existingLikeIndex = newPost.oldPost.likes.findIndex(like => like.userId === userCheckLiked);
+
+        const post = await Post.findById(newPost.oldPost._id);
+
+        const userLiked = {
+            userId: newPost.userLiked, // Use the userLiked identifier
+        };
+
+
+        // Choose to like and they haven't already liked
+        if (existingLikeIndex !== -1) {
+            // Remove the userLiked from the likes array
+            post.likes.splice(existingLikeIndex, 1);
+        } else {
+            post.likes.push(userLiked);
+        }
+
+        // Save the updated post
+        await post.save();
+
+        // Get the length of the post.likes array
+        const likesCount = post.likes.length;
+        console.log(likesCount);
+
+        res.status(200).json({
+            message: 'il Post è stato cambiato!',
+            likesCount: likesCount, // Include likes count in the response
+            post:post,
+        });
+
+
+    } catch (err) {
+        res.status(400).json({
+            message: err.message
+        });
+    }
+}
 
     //Updating the post, allowing user to change only the image or even the content 
     static async updatePost(req, res)
@@ -168,34 +220,45 @@ module.exports = class API
     }
 
 
-    static async comment(req, res) {
-  const { content, creatorUsername } = req.body;
-  const postId = req.params.id; // Retrieve the postId from req.params
+    static async comment(req, res)
+    {
+        const
+        {
+            content,
+            creatorUsername
+        } = req.body;
+        const postId = req.params.id; // Retrieve the postId from req.params
 
-  try {
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({
-        message: 'Post not found'
-      });
+        try
+        {
+            const post = await Post.findById(postId);
+            if (!post)
+            {
+                return res.status(404).json(
+                {
+                    message: 'Post not found'
+                });
+            }
+
+            post.comments.push(
+            {
+                comment: content,
+                creator: creatorUsername, // Use the correct key 'creator' to set the creator field
+            });
+
+            await post.save();
+            res.status(201).json(
+            {
+                message: 'Il commento è stato aggiunto al post!',
+                comments: post.comments,
+                length: post.comments.length,
+            });
+        }
+        catch (err)
+        {
+            res.status(400).json(err);
+        }
     }
-
-    post.comments.push({
-      comment: content,
-      creator: creatorUsername, // Use the correct key 'creator' to set the creator field
-    });
-
-    await post.save();
-    res.status(201).json({
-      message: 'Il commento è stato aggiunto al post!',
-        comments: post.comments,
-        length: post.comments.length,
-    });
-  } catch (err) {
-    res.status(400).json(err);
-  }
-}
-
 
 
 
@@ -204,7 +267,7 @@ module.exports = class API
     {
         const dataThread = req.body;
 
-        
+
 
 
         const post = await Post.findById(dataThread.originalMessage);
@@ -221,8 +284,8 @@ module.exports = class API
             title: dataThread.title,
             originalMessage: dataThread.originalMessage,
             creator: dataThread.creator,
-            creatorName:dataThread.creatorName,
-            
+            creatorName: dataThread.creatorName,
+
         })
 
         try
@@ -244,19 +307,25 @@ module.exports = class API
 
 
     // Adding posts/messages to the thread
-    static async threadAdd(req, res) {
+    static async threadAdd(req, res)
+    {
         const dataThread = req.body;
         const threadLinked = req.params.id;
 
 
 
-        try {
+        try
+        {
             // Find the thread in the database using the threadLinked ID
             const thread = await Thread.findById(threadLinked);
 
-            if (!thread) {
+            if (!thread)
+            {
                 // If the thread does not exist, return an error
-                return res.status(404).json({ message: "Thread not found" });
+                return res.status(404).json(
+                {
+                    message: "Thread not found"
+                });
             }
 
             // Add the new post's ID to the thread's otherMessages array
@@ -265,10 +334,18 @@ module.exports = class API
             // Save the changes to the thread
             await thread.save();
 
-            res.status(201).json({ message: "Post collegato al thread con successo." });
-        } catch (error) {
+            res.status(201).json(
+            {
+                message: "Post collegato al thread con successo."
+            });
+        }
+        catch (error)
+        {
             console.error("Error adding post to thread:", error);
-            res.status(500).json({ message: "Internal server error" });
+            res.status(500).json(
+            {
+                message: "Internal server error"
+            });
         }
     }
 

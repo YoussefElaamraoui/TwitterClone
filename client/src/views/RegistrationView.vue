@@ -37,6 +37,7 @@
                             <button>Login</button>
                         </router-link>
                     </div>
+                    {{ this.errorOccured }}
                 </div>
             </form>
         </div>
@@ -60,19 +61,19 @@ export default {
                 password: '',
                 confirm_password: '',
             },
+            errorOccured: '',
         };
     },
     methods: {
         async submitForm() {
             try {
                 const response = await axios.post(url, this.user);
-                (response.data);
 
                 // A fine registrazione se avvenuta con successo, manda al login
                 this.$router.push({ name: 'login', query: { registrationSuccess: 'true' } });
 
             } catch (error) {
-                console.error(error);
+                this.errorOccured = error.response.data.message;
             }
         },
     },

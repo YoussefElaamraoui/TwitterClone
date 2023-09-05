@@ -1,4 +1,6 @@
 <template>
+  <div :class="{ 'card': moveCard, 'cardMoved': !moveCard }">
+  </div>
   <nav>
     <router-link style="font-family:'Damion';font-size:30px" to="/"><span style="color:#EF3E36;">T</span>wi<span
         style="color:#EF3E36;">tt</span>o</router-link>
@@ -10,7 +12,7 @@
         <img  :src="require('../assets/'+post.image)">
       <router-link :to="'/thread/' + post._id">{{ post._id }}</router-link>
     </p> -->
-    <div id="container">
+    <div id="container" :class="{ 'page-loaded': !loading }">
       <div>
         <p id="page__title">Thread
           <button id="sidebarButton" @click="openSidebar">
@@ -21,14 +23,14 @@
       <br>
       <!-- Metto come key il title cosi da non avere problemi con i commenti -->
       <div class="post" v-for="postFeed in paginatedData" :key="postFeed._id">
-
         <div class="post__content">
-
           <div v-if="postFeed.content" class="post__content">
             <div class="post__container__image">
               <p class="post__title">{{ postFeed.title }}
               <p style="font-size: 12px;"><span style="color:#EF3E36;">category: </span> <span
-                  style="font-style: lowercase;">{{ postFeed.category }}</span></p>
+                  style="font-style: lowercase;">{{ postFeed.category }}, <span
+                    style="font-size:8px;font-family: sans-serif;"><br>creator:{{ postFeed.creatorName }}</span></span>
+              </p>
               <br>
               </p>
 
@@ -44,6 +46,8 @@
               <br>
               <br>
               <button class="buttonComment" @click="toggleCommentForm">commenta</button>
+              <span> Like <button :class="{ liked: liked }" @click="Like(postFeed._id, userData.id)"> &#9829;
+                  {{ postFeed.likes.length }}</button></span>
 
 
               <!-- Form commento  -->
@@ -68,6 +72,7 @@
             </p>
           </div>
 
+          <!-- if it does not have postFeed.content its treated as a comment  -->
           <div v-else class="comment__user"
             style="padding:15px;border-radius:10px ;margin-top:15px;background-color:#f8f8f8">
             <div>
@@ -162,7 +167,6 @@
 import API from '../api';
 
 import { watchEffect, computed } from 'vue';
-import axios from 'axios';
 import { useStore } from 'vuex';
 import jwtDecode from 'jwt-decode';
 
@@ -183,6 +187,7 @@ export default {
         postId: '',
         content: '',
       },
+      liked: false,
       allowed: true,
       post: {
         title: '',
@@ -192,10 +197,13 @@ export default {
         image: '',
         username: '',
       },
+      numberOfLikes: 0,
       currentPage: 1,
       perPage: 5,
       userDecoded: null,
       nSubmit: 0,
+      moveCard: true,
+
     };
   },
   computed: {
@@ -241,6 +249,7 @@ export default {
         if (postIndex >= this.posts.length) break;
 
         paginatedData.push(this.posts[postIndex]);
+        console.log("ecco i dati dei post ", paginatedData)
 
         if (this.posts[postIndex].comments && this.posts[postIndex].comments.length > 0) {
           const commentEndIndex = Math.min(endIndex - totalItemsAdded - 1, this.posts[postIndex].comments.length);
@@ -262,10 +271,9 @@ export default {
 
       return paginatedData.slice(startIndex, endIndex); // Limit the data to the current page
     },
-
-
     totalPages() {
       const totalPosts = this.posts.length;
+
       let totalComments = 0;
       for (const post of this.posts) {
         if (post.comments && Array.isArray(post.comments)) {
@@ -277,6 +285,30 @@ export default {
     },
   },
   methods: {
+    async Like(postId, userId) {
+      try {
+        // Fetch the current post data
+        const postToUpdate = await API.getAllPostById(postId);
+
+        // Call the API to like the post and get the updated likes count
+        const response = await API.updatePostLikes(postId, postToUpdate, userId);
+
+        // Update the likes count for the current post
+        this.numberOfLikes = response.likesCount;
+
+        // Find the post in the paginatedData array and update its likes count
+        const postIndex = this.paginatedData.findIndex((post) => post._id === postId);
+        if (postIndex !== -1) {
+          this.paginatedData[postIndex] = response.post;
+          console.log("this.paginatedData", this.paginatedData[postIndex]);
+        }
+
+        // Toggle the liked state
+        this.liked = !this.liked;
+      } catch (error) {
+        console.error(error);
+      }
+    },
 
     getPaginatedData(startIndex, endIndex) {
       const paginatedData = [];
@@ -349,10 +381,13 @@ export default {
         // Find the index of the original message in this.posts array
         const originalMessageIndex = this.posts.findIndex((post) => post._id === arrayPosts.originalMessage._id);
 
+
         if (originalMessageIndex !== -1) {
           // Update the original message in this.posts array
           this.posts.splice(originalMessageIndex, 1, arrayPosts.originalMessage);
         }
+
+        console.log("ecco i tuoi dati", arrayPosts.originalMessage);
 
         // Add new comments to this.posts array
         for (const comment of arrayPosts.otherMessages) {
@@ -391,7 +426,6 @@ export default {
           this.nSubmit = response.length;
           console.log("il numero di commenti gia presenti ", this.nSubmit);
         }
-
         // Hide the comment form after submitting
         this.showCommento = false;
         console.log(this.posts);
@@ -399,10 +433,6 @@ export default {
         console.error('Error while adding comment:', error);
       }
     },
-
-
-
-
 
 
     async toggleCommentForm() {
@@ -446,7 +476,7 @@ export default {
 
         if (threadUsername.creatorName != this.post.username) {
           this.allowed = false;
-          console.log("non ti è permesso fare questa modifica, non sei il proprietario")
+          alert("non ti è permesso fare questa modifica, non sei il proprietario")
           return;
         }
 
@@ -506,6 +536,12 @@ export default {
         this.fetchData();
       }
     });
+    
+    setTimeout(() => {
+
+      this.moveCard = false; // card 
+    }, 0);
+
     try {
 
 
@@ -566,6 +602,7 @@ button {
   padding: 6px;
   color: white;
 }
+
 
 .buttonComment {
   border: 2px solid red;
@@ -651,8 +688,30 @@ button {
 #contenuto {
   display: block;
   padding: 50px;
+
 }
 
+
+.card {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: 1;
+  background-color: #f15946;
+  transform: translate(-100vw, 0);
+  transition: 2s ease-in-out;
+
+}
+
+.cardMoved {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: 1;
+  background-color: #f15946;
+  transform: translate(100vw, 0);
+  transition: 2s ease-in-out;
+}
 
 
 #thread {

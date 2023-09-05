@@ -1,33 +1,41 @@
 const mongoose = require('mongoose');
 
+const likeSchema = mongoose.Schema({
+  userId: {
+    type: String,
+    ref: 'User',
+    required: true
+  }
+});
+
 const commentSchema = mongoose.Schema({
   comment: {
-    type:String,
+    type: String,
     required: true
   },
   creator: {
-    type:String,
-    required:true
+    type: String,
+    required: true
   },
+  likes:[likeSchema],
   created: {
     type: Date,
     default: Date.now
   }
 });
 
+
 const postSchema = mongoose.Schema({
   title: String,
   category: String,
   content: String,
   image: String,
+  likes: [likeSchema], // Array to store user likes
   creator: {
-    type: mongoose.Schema.Types.ObjectId, // Change the type to ObjectId
-    ref: 'User', // Replace 'User' with the actual model name for your users.
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
-  creatorName: {
-    type: String,
-
-  },
+  creatorName: String,
   created: {
     type: Date,
     default: Date.now
