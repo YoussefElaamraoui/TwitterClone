@@ -3,7 +3,7 @@
 This repository is for a University assignment, whose goal is to create a Twitter clone.
 
 I opted for a MEVN (MongoDB-Express-Vuejs-Nodejs)  stack app.
-My main reasons were two: 
+My reasons: 
 
 1) having a better understanding of MEVN
 2) simplicity

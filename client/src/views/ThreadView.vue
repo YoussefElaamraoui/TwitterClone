@@ -5,7 +5,7 @@
     <router-link style="font-family:'Damion';font-size:30px" to="/"><span style="color:#EF3E36;">T</span>wi<span
         style="color:#EF3E36;">tt</span>o</router-link>
   </nav>
-  <div class="home">
+  <div style="opacity:0;transition:0.4s ease-in-out" :class="{'home':showContent}">
 
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
     <!-- <p v-for="post in posts" :key="post._id">
@@ -203,6 +203,7 @@ export default {
       userDecoded: null,
       nSubmit: 0,
       moveCard: true,
+      showContent: false,
 
     };
   },
@@ -540,7 +541,12 @@ export default {
     setTimeout(() => {
 
       this.moveCard = false; // card 
-    }, 0);
+    }, 0); 
+
+    setTimeout(() => {
+
+      this.showContent = true; // card 
+    }, 2000);
 
     try {
 
@@ -726,6 +732,11 @@ button {
 
 #home__title {
   color: #EF3E36;
+}
+
+.home{
+  opacity: 1 !important;
+
 }
 
 #thread__content {

@@ -2,12 +2,12 @@
 
   <router-view />
 
-  <footer>
+  <!-- <footer>
     <p style="margin: 0px;">
       Youssef El aamraoui<br>
       copyright 2023
     </p>
-  </footer>
+  </footer> -->
 </template>
 
 <style>
